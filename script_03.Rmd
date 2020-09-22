@@ -42,6 +42,11 @@ sep_old <-
          department = course_department) %>% 
   filter(u_grad > 10)
 
+sep_old%>%
+group_by(title, id, department, name)%>%
+  summarize(u_grad_old = sum(u_grad))->combined_sep_old
+
+
 # But this is not correct! Look for Gov 50: Data. What do you see? What can you
 # do to clean it up?
 ```
@@ -50,6 +55,23 @@ sep_old <-
 ### Scene 1
 
 **Prompt:** Read in and clean the new data, creating an object called `sep_new`. 
+```{r}
+sep_new <- read_excel("new_data/class_enrollment_summary_by_term_9-22-2020 (1).xlsx", skip = 3) %>%
+  clean_names()%>%
+  filter(! is.na(course_title)) %>% 
+  select(-grad, -non_degree, -x_reg, -vus, -employee, 
+         -withdraw, -total, -instructor_full_name, -course_section_code) %>%
+  rename(id = course_id,
+         title = course_title,
+         name = course_name,
+         department = course_department) %>% 
+  filter(u_grad > 10)
+
+sep_new%>%
+group_by(title, id, department, name)%>%
+  summarize(u_grad = sum(u_grad))->combined_sep_new
+  
+```
 
 
 
@@ -60,18 +82,26 @@ sep_old <-
 
 Before we start on the model, Wisdom suggests we should:
 
-
-
+-specifically define what we want to know
+-recognize data that we probably don't need/won't be relevant
+-be aware of assumptions that have been made
 
 After we have a model, Temperance suggests we should:
 
+-recognize the limitations of our models
+-being humble about how our models might not be incomplete
+-be aware that randomization does not always work
 
 
 ### Scene 3
 
 **Prompt:** Which classes had the biggest increases and decreases in undergraduate enrollments between September 1 and today? Make a graphic that shows the 5 biggest increases and decreases. Make it look nice.
 
-
+```{r}
+inner_join(combined_sep_old, combined_sep_new)%>%
+  mutate(enrollment_change = u_grad_old - u_grad)%>%
+  arrange(desc(enrollment_change))
+```
 
 
 
@@ -79,6 +109,9 @@ After we have a model, Temperance suggests we should:
 
 **Prompt:**  What might have caused drops in these classes? Assume that one of the causes might have been the amount of work assigned in the first two weeks of class. Create a simplified ideal Preceptor Table (using a spreadsheet of your choice) with no missing data which would allow us to investigate this situation. What data is missing and why? Create an actual Preceptor Table, again using a spreadsheet. How might we investigate the effect of work assigned in the first two weeks? Would the estimated Average Treatment Effect be accurate? Why or why not? Put some bullet points here and be prepared to show your spreadsheet to the class.
 
+```{r}
+
+```
 
 ## Scene 5
 
